@@ -1,0 +1,86 @@
+#!/bin/bash
+# @author:  bgohier
+# @date:    19/11/2016
+##
+
+USAGE="Usage: $0 [,PARAMETERS]
+    Generate a random key (default size=32 with alphanumeric
+    characters upper and lower case).
+ACTIONS:
+    -h|--help               Display this help message
+    -l|--lowercase          Include lowercases
+    -u|--uppercase          Include uppercases
+    -n|--number             Include numbers
+    -s|--size <SIZE>        The key length (default=32)
+"
+
+FORMAT='a-zA-Z0-9'
+KEY_SIZE=32
+pre_load()
+{
+	while [ ! -z "$1" ] ; do
+		case "$1" in
+			-h|--help)
+				echo "${USAGE}"
+				exit 0
+				;;
+			-l|--lowercase)
+				FORMAT=""
+				;;
+			-u|--uppercase)
+				FORMAT=""
+				;;
+			-n|--number)
+				FORMAT=""
+				;;
+			-s|--size)
+				shift
+				;;
+			*)
+				echo "Error: Unknown parameter '$1'"
+				echo "${USAGE}"
+				exit 2
+				;;
+		esac
+		shift
+	done
+}
+
+pre_load $*
+
+while [ ! -z "$1" ] ; do
+	case "$1" in
+		-h|--help)
+			;;
+		-l|--lowercase)
+			FORMAT="${FORMAT}a-z"
+			;;
+		-u|--uppercase)
+			FORMAT="${FORMAT}A-Z"
+			;;
+		-n|--number)
+			FORMAT="${FORMAT}0-9"
+			;;
+		-s|--size)
+			if [ -z "${2}" ] ; then
+				echo "Error: Please specify the key length"
+				echo "${USAGE}"
+				exit 3
+			else
+				KEY_SIZE=$2
+				shift
+			fi
+			;;
+		*)
+			echo "Error: Unknown parameter '$1'"
+			echo "${USAGE}"
+			exit 2
+			;;
+	esac
+	shift
+done
+
+cat /dev/urandom | tr -dc ${FORMAT} | fold -w ${KEY_SIZE} | head -n 1
+
+exit 0
+
